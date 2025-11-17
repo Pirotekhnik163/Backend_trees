@@ -33,6 +33,8 @@ export class FeedbackService {
     public async createFeedback(createData: FeedbackDTO): Promise<FeedbackEntity> {
         this.logger.log("create feedback");
         try {
+            this.logger.log(`Saved feedback with Id: ${createData}`);
+            
             const createFeedback = this.feedbackEntityRepository.create({
                 name: createData.name,
                 email: createData.email,
@@ -48,4 +50,5 @@ export class FeedbackService {
             throw e;
         }
     }
+
 }
