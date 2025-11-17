@@ -15,17 +15,32 @@ import {FeedbackModule} from "../feedback/feedback.module";
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: "postgres",
-        host: configService.get<string>("DB_HOST"),
-        port: configService.get<number>("DB_PORT"),
-        username: configService.get<string>("DB_USER"),
-        password: configService.get<string>("DB_PASSWORD"),
-        database: configService.get<string>("DB_NAME"),
-        ssl: false,
-        autoLoadEntities: true,
-        synchronize: true,
-      })
+      useFactory: (configService: ConfigService) => {
+        const dbUrl = configService.get<string>("DATABASE_URL");
+        const isProd = !!dbUrl;
+
+        if (isProd) {
+          return {
+            type: "postgres",
+            url: dbUrl,
+            autoLoadEntities: true,
+            synchronize: false,
+            migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+          }
+        }
+
+        return {
+          type: "postgres",
+          host: configService.get<string>("DB_HOST"),
+          port: configService.get<number>("DB_PORT"),
+          username: configService.get<string>("DB_USER"),
+          password: configService.get<string>("DB_PASSWORD"),
+          database: configService.get<string>("DB_NAME"),
+          ssl: false,
+          autoLoadEntities: true,
+          synchronize: true,
+        }
+      }
     }),
     CitiesModule,
     ShareModule,
